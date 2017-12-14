@@ -116,7 +116,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
                         request.Content.Headers.ContentType = new MediaTypeHeaderValue("text/xml") { CharSet = "utf-8" };
                     }
 
-                using (var client = this.Service.PrepareHttpClient())
+                using (var client = this.Service.PrepareHttpClient(url))
                 using (IEwsHttpWebResponse webResponse = new EwsHttpResponse(client.SendAsync(request).Result))
                 {
                     if (AutodiscoverRequest.IsRedirectionResponse(webResponse))

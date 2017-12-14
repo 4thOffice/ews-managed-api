@@ -37,6 +37,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
     using System.Net.Http;
     using Data.Core;
     using System.Net.Http.Headers;
+    using System.Runtime.InteropServices;
 
     /// <summary>
     /// Defines a delegate that is used by the AutodiscoverService to ask whether a redirectionUrl can be used.
@@ -223,7 +224,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue("text/xml") { CharSet = "utf-8" };
             }
 
-            using (var client = this.PrepareHttpClient())
+            using (var client = this.PrepareHttpClient(url))
             using (IEwsHttpWebResponse webResponse = new EwsHttpResponse(client.SendAsync(request).Result))
             {
                 Uri redirectUrl;
@@ -1510,7 +1511,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
             return request;
         }
 
-        internal HttpClient PrepareHttpClient()
+        internal HttpClient PrepareHttpClient(Uri uri)
         {
             var httpClientHandler = new HttpClientHandler()
             {
@@ -1533,13 +1534,34 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
                 {
                     throw new ServiceLocalException(Strings.CredentialsRequired);
                 }
+                
+                // TODO support different credentials
+                if (!(serviceCredentials is WebCredentials))
+                    throw new NotImplementedException();
+
+                if (uri != null)
+                {
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        var networkCredentials = ((WebCredentials)serviceCredentials).Credentials as NetworkCredential;
+
+                        if (networkCredentials != null)
+                        {
+                          CredentialCache nonWinCredentials = new CredentialCache();
+                          nonWinCredentials.Add(uri, "NTLM", networkCredentials);
+                          //nonWinCredentials.Add(new Uri(".."), "Negotiate", new NetworkCredential(...));
+                          nonWinCredentials.Add(uri, "Digest", networkCredentials);
+                          nonWinCredentials.Add(uri, "Basic", networkCredentials);
+                        
+                          serviceCredentials = nonWinCredentials;
+                          this.Credentials = serviceCredentials;
+                        }
+                    }
+                }
 
                 // Make sure that credentials have been authenticated if required
                 serviceCredentials.PreAuthenticate();
 
-                // TODO support different credentials
-                if (!(serviceCredentials is WebCredentials))
-                    throw new NotImplementedException();
                 httpClientHandler.Credentials = (this.Credentials as WebCredentials)?.Credentials;
 
                 // Apply credentials to the request
@@ -1908,7 +1930,7 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
         /// <summary>
         /// Gets or sets the URL this service is bound to.
         /// </summary>
-        public Uri Url
+        public new Uri Url
         {
             get { return this.url; }
             set
