@@ -730,7 +730,11 @@ namespace Microsoft.Exchange.WebServices.Data
                   nonWinCredentials.Add(this.Url, "Digest", networkCredentials);
                   nonWinCredentials.Add(this.Url, "Basic", networkCredentials);
         
-                  this.Credentials = nonWinCredentials;
+                  this.credentials = nonWinCredentials;
+                }
+                else
+                {
+                  throw new Exception("Unknown credentials");
                 }
               }
             }
