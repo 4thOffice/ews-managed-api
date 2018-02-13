@@ -641,6 +641,14 @@ namespace Microsoft.Exchange.WebServices.Autodiscover
         /// <returns>Autodiscover URL (may be null if lookup failed)</returns>
         internal Uri GetRedirectionUrlFromDnsSrvRecord(string domainName)
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                this.TraceMessage(
+                  TraceFlags.AutodiscoverConfiguration,
+                  string.Format("Skipping to get Autodiscover host from DNS SRV record for {0}. Reason not windows platform", domainName));
+                return null;
+            }
+
             this.TraceMessage(
                 TraceFlags.AutodiscoverConfiguration,
                 string.Format("Trying to get Autodiscover host from DNS SRV record for {0}.", domainName));
