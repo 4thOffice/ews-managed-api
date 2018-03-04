@@ -34,8 +34,7 @@ namespace Microsoft.Exchange.WebServices.Data
     using System.Net.Http.Headers;
     using System.Security.Cryptography;
     using System.Xml;
-    using System.Runtime.InteropServices;
-
+  
     /// <summary>
     /// Represents an abstract binding to an Exchange Service.
     /// </summary>
@@ -73,7 +72,6 @@ namespace Microsoft.Exchange.WebServices.Data
         /// </summary>
         public event ResponseHeadersCapturedHandler OnResponseHeadersCaptured;
 
-        private Uri url;
         private ExchangeCredentials credentials;
         private bool useDefaultCredentials;
         private int timeout = 100000;
@@ -586,18 +584,6 @@ namespace Microsoft.Exchange.WebServices.Data
     #region Properties
 
         /// <summary>
-        /// Gets or sets the URL of the Exchange Web Services. 
-        /// </summary>
-        public Uri Url
-        {
-          get { return this.url; }
-          set {
-            this.url = value;
-            this.Credentials = this.Credentials;
-          }
-        }
-
-        /// <summary>
         /// Gets or sets the cookie container.
         /// </summary>
         /// <value>The cookie container.</value>
@@ -716,29 +702,6 @@ namespace Microsoft.Exchange.WebServices.Data
           set
           {
             this.credentials = value;
-            if (this.Url != null)
-            {
-              if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-              {
-                var networkCredentials = ((WebCredentials)this.credentials).Credentials as NetworkCredential;
-        
-                if (networkCredentials != null)
-                {
-                  CredentialCache nonWinCredentials = new CredentialCache();
-                  nonWinCredentials.Add(this.Url, "NTLM", networkCredentials);
-                  //nonWinCredentials.Add(new Uri(".."), "Negotiate", new NetworkCredential(...));
-                  nonWinCredentials.Add(this.Url, "Digest", networkCredentials);
-                  nonWinCredentials.Add(this.Url, "Basic", networkCredentials);
-        
-                  this.credentials = nonWinCredentials;
-                }
-                else
-                {
-                  throw new Exception("Unknown credentials");
-                }
-              }
-            }
-        
             this.useDefaultCredentials = false;
             this.cookieContainer = new CookieContainer();       // Changing credentials resets the Cookie container
           }

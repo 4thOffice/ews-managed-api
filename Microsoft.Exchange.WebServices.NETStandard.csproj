@@ -17,7 +17,7 @@
     <RepositoryUrl>https://github.com/sherlock1982/ews-managed-api</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 	<PackageId>EwsApi.Loop</PackageId>
-    <PackageVersion>1.1.1.2</PackageVersion>
+    <PackageVersion>1.1.1.3</PackageVersion>
     <PackageTags>ews exchange office365 Microsoft Web API Email Client Library C#</PackageTags>
   </PropertyGroup>
 

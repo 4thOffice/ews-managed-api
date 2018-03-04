@@ -47,10 +47,11 @@ namespace Microsoft.Exchange.WebServices.Data
 
         private const string TargetServerVersionHeaderName = "X-EWS-TargetVersion";
 
-        #endregion
+    #endregion
 
-        #region Fields
+    #region Fields
 
+        private Uri url;
         private CultureInfo preferredCulture;
         private DateTimePrecision dateTimePrecision = DateTimePrecision.Default;
         private ImpersonatedUserId impersonatedUserId;
@@ -5078,9 +5079,18 @@ namespace Microsoft.Exchange.WebServices.Data
                 TraceFlags.EwsResponse);
         }
 
-        #endregion
+    #endregion
 
-        #region Properties
+    #region Properties
+
+        /// <summary>
+        /// Gets or sets the URL of the Exchange Web Services. 
+        /// </summary>
+        public Uri Url
+        {
+          get { return this.url; }
+          set { this.url = value; }
+        }
 
         /// <summary>
         /// Gets or sets the Id of the user that EWS should impersonate. 

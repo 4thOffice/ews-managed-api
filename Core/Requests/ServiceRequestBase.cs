@@ -750,10 +750,11 @@ namespace Microsoft.Exchange.WebServices.Data
         /// <returns>An IEwsHttpWebRequest instance</returns>
         protected async Task<IEwsHttpWebRequest> BuildEwsHttpWebRequest()
         {
+            IEwsHttpWebRequest request = null;
             try
             {
-                IEwsHttpWebRequest request = this.Service.PrepareHttpWebRequest(this.GetXmlElementName());
-
+                request = this.Service.PrepareHttpWebRequest(this.GetXmlElementName());
+        
                 this.Service.TraceHttpRequestHeaders(TraceFlags.EwsRequestHttpHeaders, request);
 
                 bool needSignature = this.Service.Credentials != null && this.Service.Credentials.NeedSignature;
@@ -788,6 +789,11 @@ namespace Microsoft.Exchange.WebServices.Data
             }
             catch (IOException e)
             {
+                if (request != null)
+                {
+                    request.Abort();
+                }
+
                 // Wrap exception.
                 throw new ServiceRequestException(string.Format(Strings.ServiceRequestFailed, e.Message), e);
             }
