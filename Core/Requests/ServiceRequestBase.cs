@@ -817,8 +817,21 @@ namespace Microsoft.Exchange.WebServices.Data
                     this.ProcessWebException(ex);
                 }
 
+                string extraData = null;
+                try
+                {
+                    using (var rs = ex.Response.GetResponseStream())
+                    {
+                        var buffer = new byte[rs.Length];
+                        rs.Position = 0;
+                        var data = await rs.ReadAsync(buffer, 0, (int)rs.Length);
+                        extraData = Encoding.UTF8.GetString(buffer);
+                    }
+                }
+                catch (Exception) { }
+
                 // Wrap exception if the above code block didn't throw
-                throw new ServiceRequestException(string.Format(Strings.ServiceRequestFailed, ex.Message), ex);
+                throw new ServiceRequestException(string.Format(Strings.ServiceRequestFailed, string.Format("{0}\n{1}", ex.Message, extraData)), ex);
             }
             catch (IOException e)
             {
